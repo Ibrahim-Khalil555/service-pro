@@ -4,6 +4,7 @@ import {
   Search, User, Mail, Phone, MapPin, Calendar,
   DollarSign, Wrench, LogOut, ShieldAlert, Eye
 } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const ADMIN_PASSWORD = 'admin123';
 
@@ -165,7 +166,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/bookings');
+      const res = await fetch(`${API_BASE_URL}/api/bookings`);
       setBookings(await res.json());
     } catch {
       console.error('Failed to fetch bookings');
@@ -177,13 +178,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   useEffect(() => { fetchBookings(); }, [fetchBookings]);
 
   const confirmBooking = async (id: string) => {
-    await fetch(`/api/bookings/${id}/confirm`, { method: 'PATCH' });
+    await fetch(`${API_BASE_URL}/api/bookings/${id}/confirm`, { method: 'PATCH' });
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' } : b));
   };
 
   const deleteBooking = async (id: string) => {
     if (!confirm('Delete this booking?')) return;
-    await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
+    await fetch(`${API_BASE_URL}/api/bookings/${id}`, { method: 'DELETE' });
     setBookings(prev => prev.filter(b => b.id !== id));
   };
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lock, Clock, CheckCircle, Loader2, CreditCard, X } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const SERVICE_FEE = 10;
 
@@ -119,7 +120,7 @@ export default function CheckoutPage() {
 
     try {
       // 1. Save booking to database (Admin Panel)
-      const bookingRes = await fetch('/api/bookings', {
+      const bookingRes = await fetch(`${API_BASE_URL}/api/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -139,7 +140,7 @@ export default function CheckoutPage() {
 
       // 2. Send confirmation email via backend proxy (Nodemailer)
       // We don't await this or block the UI if it fails, but we try our best
-      fetch('/api/send-confirmation', {
+      fetch(`${API_BASE_URL}/api/send-confirmation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

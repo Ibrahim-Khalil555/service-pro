@@ -51,8 +51,25 @@ if (existsSync(SERVICE_ACCOUNT_FILE) || SERVICE_ACCOUNT_ENV) {
 }
 
 const app = express();
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:4173', 'https://*.vercel.app'] }));
+
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:4173',
+  ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : []),
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.some(o => origin.startsWith(o)) || origin.includes('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 app.use(express.json());
+
 
 app.post('/api/bookings', async (req, res) => {
   if (!db) return res.status(503).json({ error: 'Database not initialized' });

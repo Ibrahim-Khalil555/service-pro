@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ServiceCard from './ServiceCard';
+import API_BASE_URL from '../config/api';
 
 // Icon mapping helper
 const getIcon = (iconName: string) => {
@@ -44,7 +45,7 @@ export default function ServiceList({ searchQuery, sortOption }: ServiceListProp
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch('/api/services');
+        const res = await fetch(`${API_BASE_URL}/api/services`);
         if (!res.ok) throw new Error('Failed to fetch services');
         const data = await res.json();
         setServices(data);
