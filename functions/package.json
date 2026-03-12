@@ -1,0 +1,19 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for ServicePro",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.1.0",
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "gmail-send": "^1.8.14",
+    "dotenv": "^17.3.1"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "private": true
+}
