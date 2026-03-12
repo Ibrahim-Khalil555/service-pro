@@ -20,24 +20,34 @@ if (existsSync(SERVICE_ACCOUNT_FILE) || SERVICE_ACCOUNT_ENV) {
   try {
     let serviceAccount;
     if (SERVICE_ACCOUNT_ENV) {
-      console.log('Using Firebase credentials from environment variable');
-      const rawJson = SERVICE_ACCOUNT_ENV.trim();
-      serviceAccount = JSON.parse(rawJson.startsWith('"') && rawJson.endsWith('"') ? JSON.parse(rawJson) : rawJson);
+      console.log('Attempting to initialize Firebase from environment variable...');
+      try {
+        const rawJson = SERVICE_ACCOUNT_ENV.trim();
+        // Handle double-quoted or escaped strings commonly found in Vercel env vars
+        serviceAccount = JSON.parse(rawJson.startsWith('"') && rawJson.endsWith('"') ? JSON.parse(rawJson) : rawJson);
+        console.log('Successfully parsed FIREBASE_SERVICE_ACCOUNT JSON');
+      } catch (parseErr) {
+        throw new Error(`Environment variable JSON parse failed: ${parseErr.message}. Ensure the entire JSON content is pasted correctly in Vercel.`);
+      }
     } else {
       console.log('Using Firebase credentials from local file');
       serviceAccount = JSON.parse(readFileSync(SERVICE_ACCOUNT_FILE, 'utf-8'));
+    }
+
+    if (!serviceAccount.project_id) {
+      throw new Error('Invalid Service Account format: missing project_id');
     }
 
     initializeApp({
       credential: cert(serviceAccount)
     });
     db = getFirestore();
-    console.log('Firebase Admin initialized successfully');
+    console.log('Firebase Admin initialized successfully for project:', serviceAccount.project_id);
   } catch (err) {
-    console.error('Failed to initialize Firebase Admin:', err.message);
+    console.error('CRITICAL FIREBASE ERROR:', err.message);
   }
 } else {
-  console.warn('Firebase credentials not found (file or env) — API will be limited');
+  console.warn('⚠️ Firebase credentials MISSING. Please set FIREBASE_SERVICE_ACCOUNT in Vercel settings.');
 }
 
 const app = express();
