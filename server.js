@@ -2,33 +2,42 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { randomUUID } from 'crypto';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { readFileSync, existsSync } from 'fs';
 import gmailSend from 'gmail-send';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 let db;
-const SERVICE_ACCOUNT_FILE = './firebase-service-account.json';
+const SERVICE_ACCOUNT_FILE = path.join(__dirname, 'firebase-service-account.json');
 const SERVICE_ACCOUNT_ENV = process.env.FIREBASE_SERVICE_ACCOUNT;
 
 if (existsSync(SERVICE_ACCOUNT_FILE) || SERVICE_ACCOUNT_ENV) {
   try {
     let serviceAccount;
-    if (existsSync(SERVICE_ACCOUNT_FILE)) {
-      serviceAccount = JSON.parse(readFileSync(SERVICE_ACCOUNT_FILE, 'utf-8'));
+    if (SERVICE_ACCOUNT_ENV) {
+      console.log('Using Firebase credentials from environment variable');
+      const rawJson = SERVICE_ACCOUNT_ENV.trim();
+      serviceAccount = JSON.parse(rawJson.startsWith('"') && rawJson.endsWith('"') ? JSON.parse(rawJson) : rawJson);
     } else {
-      serviceAccount = JSON.parse(SERVICE_ACCOUNT_ENV);
+      console.log('Using Firebase credentials from local file');
+      serviceAccount = JSON.parse(readFileSync(SERVICE_ACCOUNT_FILE, 'utf-8'));
     }
+
     initializeApp({
       credential: cert(serviceAccount)
     });
     db = getFirestore();
     console.log('Firebase Admin initialized successfully');
   } catch (err) {
-    console.error('Failed to initialize Firebase Admin:', err);
+    console.error('Failed to initialize Firebase Admin:', err.message);
   }
 } else {
-  console.warn('Firebase credentials not found — API will be limited');
+  console.warn('Firebase credentials not found (file or env) — API will be limited');
 }
 
 const app = express();
