@@ -4,7 +4,6 @@ import { ArrowLeft, Lock, Clock, CheckCircle, Loader2, CreditCard, X } from 'luc
 
 const SERVICE_FEE = 10;
 
-// ─── Card input formatter helpers ───────────────────────────────────────────
 function formatCardNumber(val: string) {
   return val.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
 }
@@ -14,7 +13,6 @@ function formatExpiry(val: string) {
   return digits;
 }
 
-// ─── Success Modal Component ────────────────────────────────────────────────
 function SuccessModal({ details, onClose }: { details: any, onClose: () => void }) {
   console.log('SuccessModal rendered with details:', details);
   
@@ -83,7 +81,6 @@ function SuccessModal({ details, onClose }: { details: any, onClose: () => void 
   );
 }
 
-// ─── Main Page ───────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
   const location = useLocation();
   const navigate = useNavigate();

@@ -22,7 +22,6 @@ interface Booking {
   notes?: string;
 }
 
-// ─── Login Screen ─────────────────────────────────────────────────────────────
 function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -76,7 +75,6 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
   );
 }
 
-// ─── Booking Detail Modal ─────────────────────────────────────────────────────
 function BookingModal({ booking, onClose, onConfirm, onDelete }: {
   booking: Booking;
   onClose: () => void;
@@ -157,7 +155,6 @@ function BookingModal({ booking, onClose, onConfirm, onDelete }: {
   );
 }
 
-// ─── Main Admin Dashboard ─────────────────────────────────────────────────────
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -381,7 +378,6 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   );
 }
 
-// ─── Root: handles auth gate ──────────────────────────────────────────────────
 export default function AdminPanel() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('admin_auth') === '1');
 
