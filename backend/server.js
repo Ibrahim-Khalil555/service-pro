@@ -13,7 +13,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let db;
-let debugFirebase = {};
 const SERVICE_ACCOUNT_FILE = path.join(__dirname, 'firebase-service-account.json');
 const SERVICE_ACCOUNT_ENV = process.env.FIREBASE_SERVICE_ACCOUNT;
 
@@ -24,34 +23,17 @@ if (existsSync(SERVICE_ACCOUNT_FILE) || SERVICE_ACCOUNT_ENV) {
       console.log('Attempting to initialize Firebase from environment variable...');
       try {
         const rawJson = SERVICE_ACCOUNT_ENV.trim();
-        debugFirebase.rawLength = rawJson.length;
         // Handle double-quoted or escaped strings commonly found in Vercel/Render env vars
         const parsedJson = JSON.parse(rawJson.startsWith('"') && rawJson.endsWith('"') ? JSON.parse(rawJson) : rawJson);
         
-        debugFirebase.hasPrivateKeyObj = !!parsedJson.private_key;
-        debugFirebase.hasProjectIdObj = !!parsedJson.project_id;
-        debugFirebase.hasClientEmailObj = !!parsedJson.client_email;
-
         // CRITICAL FIX FOR RENDER: The private_key field often gets its actual newlines (\n) converted to literal escaped slashes (\\n) when injected via env vars.
         if (parsedJson.private_key) {
-          const pk = parsedJson.private_key;
-          debugFirebase.pkLengthBefore = pk.length;
-          debugFirebase.startsWithBegin = pk.startsWith('-----BEGIN PRIVATE KEY-----');
-          debugFirebase.endsWithEnd = pk.trim().endsWith('-----END PRIVATE KEY-----');
-          debugFirebase.containsActualNewlinesBefore = pk.includes('\n');
-          debugFirebase.containsEscapedNewlinesBefore = pk.includes('\\n');
-
           parsedJson.private_key = parsedJson.private_key.replace(/\\n/g, '\n');
-          
-          debugFirebase.pkLengthAfter = parsedJson.private_key.length;
-          debugFirebase.containsActualNewlinesAfter = parsedJson.private_key.includes('\n');
         }
         
         serviceAccount = parsedJson;
-        debugFirebase.parseSuccess = true;
         console.log('Successfully parsed FIREBASE_SERVICE_ACCOUNT JSON');
       } catch (parseErr) {
-        debugFirebase.parseError = parseErr.message;
         throw new Error(`Environment variable JSON parse failed: ${parseErr.message}. Ensure the entire JSON content is pasted correctly in Vercel.`);
       }
     } else {
@@ -254,13 +236,6 @@ app.get('/api/health', async (_req, res) => {
     emailConfigured: isEmailConfigured, 
     database: isDbConfigured ? 'Firestore' : 'Not Connected',
     bookingCount: bookingCount
-  });
-});
-
-app.get('/api/debug-firebase', (req, res) => {
-  res.json({
-    status: 'debug',
-    firebaseInit: debugFirebase
   });
 });
 
