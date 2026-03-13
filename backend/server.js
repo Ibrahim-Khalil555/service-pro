@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFileSync, existsSync } from 'fs';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
@@ -152,29 +152,20 @@ app.get('/api/services', async (req, res) => {
 });
 
 app.post('/api/send-confirmation', async (req, res) => {
-  const { GMAIL_USER, GMAIL_PASS } = process.env;
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  const GMAIL_USER = process.env.GMAIL_USER; // Kept for reference but not strictly needed for Resend
 
-  if (!GMAIL_USER || !GMAIL_PASS || GMAIL_USER.trim() === '' || GMAIL_PASS.trim() === '') {
-    console.warn('⚠️ Email configuration missing (GMAIL_USER or GMAIL_PASS)');
+  if (!RESEND_API_KEY || RESEND_API_KEY.trim() === '') {
+    console.warn('⚠️ Resend API configuration missing (RESEND_API_KEY)');
     return res.json({ 
       success: false, 
-      reason: 'GMAIL_USER or GMAIL_PASS not configured' 
+      reason: 'RESEND_API_KEY not configured' 
     });
   }
 
   console.log(`Attempting to send confirmation email to: ${req.body.email}`);
 
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // Use STARTTLS
-    auth: {
-      user: GMAIL_USER,
-      pass: GMAIL_PASS,
-    },
-    connectionTimeout: 30000, 
-    greetingTimeout: 30000,
-  });
+  const resend = new Resend(RESEND_API_KEY);
 
   try {
     const { email, name, serviceTitle, servicePrice, phone, address, date, time } = req.body;
@@ -213,15 +204,19 @@ app.post('/api/send-confirmation', async (req, res) => {
       </body></html>
     `;
 
-    const info = await transporter.sendMail({
-      from: `"ServicePro" <${GMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: 'ServicePro <onboarding@resend.dev>',
       to: email,
       subject: `✅ Booking Confirmed: ${serviceTitle}`,
       html: htmlContent,
     });
     
-    console.log('Email sent successfully:', info.messageId);
-    res.json({ success: true, messageId: info.messageId });
+    if (error) {
+      throw error;
+    }
+
+    console.log('Email sent successfully:', data.id);
+    res.json({ success: true, messageId: data.id });
   } catch (err) {
     console.error('CRITICAL EMAIL ERROR:', err);
     res.status(500).json({ 
