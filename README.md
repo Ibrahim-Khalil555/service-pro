@@ -28,43 +28,53 @@ Before you begin, ensure you have the following installed:
 
 ## ⚙️ Setup & Installation
 
-Follow these steps to get your local development environment running:
+ServicePro has been separated into independent `frontend` and `backend` projects. Follow these steps to deploy and run them:
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/service-pro.git
-cd service-pro
-```
+### 1. Backend Setup & Deployment
+First, deploy or run the backend server.
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file in the `backend` directory with your credentials:
+   ```env
+   PORT=5000
+   GMAIL_USER=your-email@gmail.com
+   GMAIL_PASS=your-app-password
+   ```
+4. Setup Firebase:
+   - Generate a New Private Key from Firebase Console (Project Settings > Service Accounts).
+   - Rename the file to `firebase-service-account.json` and place it in the `backend` directory.
+5. Deploy or run locally:
+   ```bash
+   npm start
+   ```
 
-### 2. Install Dependencies
-```bash
-npm install
-```
+### 2. Frontend Setup & Deployment
+Once the backend is deployed, you will get a live backend API URL.
 
-### 3. Configure Environment Variables
-Create a `.env` file in the root directory and add your credentials:
-```env
-PORT=3001
-GMAIL_USER=your-email@gmail.com
-GMAIL_PASS=your-app-password
-```
-> **Note**: For `GMAIL_PASS`, you should use a Google [App Password](https://support.google.com/accounts/answer/185833?hl=en), not your regular password.
-
-### 4. Setup Firebase
-1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
-2. Enable **Firestore Database**.
-3. Go to **Project Settings > Service Accounts**.
-4. Click **Generate New Private Key** and download the JSON file.
-5. Rename the file to `firebase-service-account.json` and place it in the project root.
-
-### 5. Start the Application
-```bash
-npm run dev
-```
-The application will launch on:
-- **Frontend**: [http://localhost:5173](http://localhost:5173)
-- **API Server**: [http://localhost:3001](http://localhost:3001)
-- **Admin Panel**: [http://localhost:5173/admin](http://localhost:5173/admin)
+1. Navigate to the frontend directory:
+   ```bash
+   cd ../frontend
+   ```
+2. Open `src/config/api.ts` and replace the `API_BASE_URL` with your deployed backend URL.
+   ```typescript
+   // frontend/src/config/api.ts
+   const API_BASE_URL = 'https://your-deployed-backend-url.com';
+   export default API_BASE_URL;
+   ```
+3. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+4. Deploy to Vercel/Netlify or run locally:
+   ```bash
+   npm run dev
+   ```
 
 ## 🔮 Future Roadmap
 

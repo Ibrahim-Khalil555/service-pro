@@ -1,0 +1,22 @@
+{
+  "name": "service-pro-backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^8.3.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "firebase-admin": "^12.7.0",
+    "gmail-send": "^1.8.14",
+    "stripe": "^20.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1"
+  }
+}
