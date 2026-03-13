@@ -23,8 +23,15 @@ if (existsSync(SERVICE_ACCOUNT_FILE) || SERVICE_ACCOUNT_ENV) {
       console.log('Attempting to initialize Firebase from environment variable...');
       try {
         const rawJson = SERVICE_ACCOUNT_ENV.trim();
-        // Handle double-quoted or escaped strings commonly found in Vercel env vars
-        serviceAccount = JSON.parse(rawJson.startsWith('"') && rawJson.endsWith('"') ? JSON.parse(rawJson) : rawJson);
+        // Handle double-quoted or escaped strings commonly found in Vercel/Render env vars
+        const parsedJson = JSON.parse(rawJson.startsWith('"') && rawJson.endsWith('"') ? JSON.parse(rawJson) : rawJson);
+        
+        // CRITICAL FIX FOR RENDER: The private_key field often gets its actual newlines (\n) converted to literal escaped slashes (\\n) when injected via env vars.
+        if (parsedJson.private_key) {
+          parsedJson.private_key = parsedJson.private_key.replace(/\\n/g, '\n');
+        }
+        
+        serviceAccount = parsedJson;
         console.log('Successfully parsed FIREBASE_SERVICE_ACCOUNT JSON');
       } catch (parseErr) {
         throw new Error(`Environment variable JSON parse failed: ${parseErr.message}. Ensure the entire JSON content is pasted correctly in Vercel.`);
