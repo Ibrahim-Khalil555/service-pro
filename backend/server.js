@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFileSync, existsSync } from 'fs';
-import gmailSend from 'gmail-send';
+import nodemailer from 'nodemailer';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
@@ -164,9 +164,16 @@ app.post('/api/send-confirmation', async (req, res) => {
 
   console.log(`Attempting to send confirmation email to: ${req.body.email}`);
 
-  const send = gmailSend({
-    user: GMAIL_USER,
-    pass: GMAIL_PASS,
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Use SSL/TLS
+    auth: {
+      user: GMAIL_USER,
+      pass: GMAIL_PASS,
+    },
+    connectionTimeout: 20000, // 20 seconds
+    greetingTimeout: 20000,
   });
 
   try {
@@ -206,14 +213,15 @@ app.post('/api/send-confirmation', async (req, res) => {
       </body></html>
     `;
 
-    const result = await send({
+    const info = await transporter.sendMail({
+      from: `"ServicePro" <${GMAIL_USER}>`,
       to: email,
       subject: `✅ Booking Confirmed: ${serviceTitle}`,
       html: htmlContent,
     });
     
-    console.log('Email sent successfully:', result.result);
-    res.json({ success: true, detailed: result });
+    console.log('Email sent successfully:', info.messageId);
+    res.json({ success: true, messageId: info.messageId });
   } catch (err) {
     console.error('CRITICAL EMAIL ERROR:', err);
     res.status(500).json({ 

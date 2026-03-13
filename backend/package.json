@@ -13,7 +13,7 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "firebase-admin": "^12.7.0",
-    "gmail-send": "^1.8.14",
+    "nodemailer": "^6.9.13",
     "stripe": "^20.4.1"
   },
   "devDependencies": {
