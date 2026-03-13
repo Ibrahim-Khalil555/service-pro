@@ -166,14 +166,14 @@ app.post('/api/send-confirmation', async (req, res) => {
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // Use SSL/TLS
+    port: 587,
+    secure: false, // Use STARTTLS
     auth: {
       user: GMAIL_USER,
       pass: GMAIL_PASS,
     },
-    connectionTimeout: 20000, // 20 seconds
-    greetingTimeout: 20000,
+    connectionTimeout: 30000, 
+    greetingTimeout: 30000,
   });
 
   try {
