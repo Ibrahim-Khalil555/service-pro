@@ -154,12 +154,15 @@ app.get('/api/services', async (req, res) => {
 app.post('/api/send-confirmation', async (req, res) => {
   const { GMAIL_USER, GMAIL_PASS } = process.env;
 
-  if (!GMAIL_USER || !GMAIL_PASS) {
+  if (!GMAIL_USER || !GMAIL_PASS || GMAIL_USER.trim() === '' || GMAIL_PASS.trim() === '') {
+    console.warn('⚠️ Email configuration missing (GMAIL_USER or GMAIL_PASS)');
     return res.json({ 
       success: false, 
       reason: 'GMAIL_USER or GMAIL_PASS not configured' 
     });
   }
+
+  console.log(`Attempting to send confirmation email to: ${req.body.email}`);
 
   const send = gmailSend({
     user: GMAIL_USER,
@@ -209,10 +212,15 @@ app.post('/api/send-confirmation', async (req, res) => {
       html: htmlContent,
     });
     
+    console.log('Email sent successfully:', result.result);
     res.json({ success: true, detailed: result });
   } catch (err) {
-    console.error('Server Error during email sending:', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('CRITICAL EMAIL ERROR:', err);
+    res.status(500).json({ 
+      error: 'Failed to send confirmation email', 
+      details: err.message,
+      code: err.code || 'UNKNOWN_ERROR' 
+    });
   }
 });
 
